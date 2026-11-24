@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jiang-bandplot"
+version = "0.2.1"
+description = "Headless VASP band structures and orbital-projected fat bands"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.23", "matplotlib>=3.7", "Pillow>=9.4"]
+
+[project.urls]
+Repository = "https://github.com/LHCstat/bandplot"
+
+[project.scripts]
+bandplot = "jiang_bandplot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
