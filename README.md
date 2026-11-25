@@ -18,13 +18,13 @@ bandplot --help
 
 ```bash
 python -m pip download --only-binary=:all: --dest wheelhouse \
-  dist/jiang_bandplot-0.2.1-py3-none-any.whl
+  dist/jiang_bandplot-0.2.2-py3-none-any.whl
 ```
 
 把整个 `wheelhouse` 复制到服务器。激活上述虚拟环境后运行：
 
 ```bash
-python -m pip install --no-index --find-links ./wheelhouse jiang-bandplot==0.2.1
+python -m pip install --no-index --find-links ./wheelhouse jiang-bandplot==0.2.2
 ```
 
 ## 出图
@@ -41,7 +41,7 @@ bandplot -orbitals Ni:dxy Ni:dz2 O:p --energy -1 1 --scale 96
 - `Ni:dxy` 选该元素的全部位点，`1,2:dz2` 选原子编号 1 和 2，`'*:d'` 选全部位点。编号从 1 开始。用 `O:p` 可合并已列出的 p 轨道。轨道轴沿用原始投影的坐标约定。默认对所选原子求和，`--normalization mean` 按原子数平均。
 - 默认最多四个通道叠加，第五个通道起自动分面。可用 `--layout overlay` 或 `--layout panels` 手动选择。共线自旋默认分开绘制，`--spin up` 和 `--spin down` 可筛选自旋。
 - `--scale auto` 根据可见的非零权重、图幅和点数确定共同的面积系数。每个点使用 `面积参数 (pt²) = 系数 × 权重`。用 `--scale 96` 可固定系数。对比图还应统一投影定义、归一化、能窗和图幅。
-- 默认输出 `bands.png`、`bands.pdf`、`bands.svg`、`bands_png.pdf` 和 `plot.json`。可用 `--formats png svg` 选择格式。连续运行会依次使用 `figures`、`figures-2` 等新目录；可用 `--output` 指定目录。
+- 默认只导出 `bands.png`，另存用于复画的 `plot.json`。用 `--formats png pdf` 可以同时导出 PNG 和矢量 PDF，也可单独选择 `svg` 或 `png-pdf`。连续运行会依次使用 `figures`、`figures-2` 等新目录；可用 `--output` 指定目录。
 - 复画时可执行 `bandplot plot --config figures-fat/plot.json --output figures-repeat`。迁移计算目录后，可用 `bandplot plot /new/calc --config figures-fat/plot.json --output figures-repeat`。程序根据记录的 SHA-256 核实输入文件，并沿用能量参考、通道、分段、自旋和投影比例尺。
 - 默认在 `${XDG_CACHE_HOME:-$HOME/.cache}/jiang-bandplot` 按 `PROCAR` 的 SHA-256 缓存。权重为 32 位浮点数组，缓存空间约为 `4 × 自旋数 × k点数 × 能带数 × 原子数 × 轨道数` 字节，另有少量元数据和能量。可指定 `--cache-dir` 或 `--no-cache`。
 

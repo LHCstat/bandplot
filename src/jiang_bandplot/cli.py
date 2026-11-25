@@ -62,7 +62,7 @@ def arguments():
     plot.add_argument("--normalization", choices=("sum", "mean"), help="对原子投影求和或取平均，默认 sum")
     plot.add_argument("--dpi", type=int, metavar="整数", help="PNG 分辨率，默认 300")
     plot.add_argument("--title", metavar="文字", help="设置图的标题")
-    plot.add_argument("--formats", nargs="+", choices=FORMATS, help="选择输出格式，默认全输出")
+    plot.add_argument("--formats", nargs="+", choices=FORMATS, help="选择输出格式，默认只输出 PNG")
     plot.add_argument("--output", type=Path, metavar="目录", help="使用新目录保存图和 plot.json")
     plot.add_argument("--config", type=Path, metavar="plot.json", help="沿用已有设置复画，并校验输入文件")
     return parser
@@ -328,7 +328,7 @@ def plot_inputs(args, directory, loaded, replay):
     dpi = replay["dpi"] if replay else (300 if args.dpi is None else args.dpi)
     if not 36 <= dpi <= 1200:
         raise ValueError("--dpi must be between 36 and 1200")
-    formats = replay["formats"] if replay else (args.formats or FORMATS)
+    formats = replay["formats"] if replay else (args.formats or ("png",))
     record = {
         "schema": 1,
         "version": __version__,

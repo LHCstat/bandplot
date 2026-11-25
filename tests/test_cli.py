@@ -116,7 +116,8 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     out = sample.parent / "many"
     succeed(invoke(sample, "plot", sample, "--orbitals", "Ni:dxy", "Ni:dx2-y2",
                    "O:p", "Ni:dz2", "1:dxz", "O:s", "--normalization", "mean",
-                   "--energy", "-1", "2", "--fermi", "8", "--output", out))
+                   "--energy", "-1", "2", "--fermi", "8", "--output", out,
+                   "--formats", "png", "pdf", "svg", "png-pdf"))
     record = json.loads((out / "plot.json").read_text())
     assert record["layout"] == "panels"
     assert record["energy_reference"]["value_eV"] == 8
@@ -133,6 +134,7 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     assert "<image" not in (out / "bands.svg").read_text(encoding="utf-8")
     other = sample.parent / "repeat"
     succeed(invoke(sample, "plot", "--config", out / "plot.json", "--output", other))
+    assert {file.name for file in other.iterdir()} == {file.name for file in out.iterdir()}
     assert (out / "bands.png").read_bytes() == (other / "bands.png").read_bytes()
 
 
@@ -231,6 +233,8 @@ def test_short_plot_command_defaults_to_local_inputs_and_lists_orbitals(sample):
     assert record["energy_range_eV"] == [-2, 3]
     assert record["marker"]["requested"] == "auto"
     assert record["sources"]["PROCAR"]["path"].endswith("PROCAR")
+    assert record["formats"] == ["png"]
+    assert {file.name for file in (sample / "figures").iterdir()} == {"bands.png", "plot.json"}
     succeed(invoke(sample, "--orbitals", "Ni:dxy", "--no-rank", "--formats", "png", in_calculation=True))
     assert (sample / "figures-2" / "bands.png").exists()
 
