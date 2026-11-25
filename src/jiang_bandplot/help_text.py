@@ -16,7 +16,7 @@ HELP_TEXT = """bandplot  绘制 VASP 能带、胖能带和查看重要轨道
   点面积自动调节，默认将 bands.png 和 plot.json 保存到 figures 等目录。
 
 常用参数
-  -orbitals, --orbitals <通道> ...   用空格分隔，如 Ni:dxy O:p 1,2:dz2。
+  -orbitals, --orbitals <通道> ...   用空格分隔，颜色按顺序分配，如 Ni:dxy O:p。
   -e, --energy <下限> <上限>         指定相对费米能的区间，单位为 eV。
   --fermi <eV>                       手动指定已确认的费米能。
   --fermi-outcar [文件]               从指定 OUTCAR 读费米能，如 ../scf/OUTCAR。

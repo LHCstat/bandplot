@@ -285,7 +285,7 @@ def rank_inputs(args, directory, loaded):
 
 
 def plot_inputs(args, directory, loaded, replay):
-    from .render import geometry, write_figures
+    from .render import channel_colors, geometry, write_figures
 
     bands, structure, path, sources, hit, notes = loaded
     if structure is None or path is None:
@@ -306,6 +306,11 @@ def plot_inputs(args, directory, loaded, replay):
     if not visible.any():
         print("Note: no sampled band energies inside the requested window.", file=sys.stderr)
     channels = [select_channel(name, weights, bands.orbitals, structure, normalization) for name in names]
+    colors = replay.get("colors") if replay else None
+    if colors is None:
+        colors = channel_colors(len(channels), legacy=replay is not None)
+    if not isinstance(colors, list) or len(colors) != len(channels):
+        raise ValueError("plot.json colors must contain one color per orbital channel")
     settings = replay.get("ranking") if replay else None
     rank_enabled = settings is not None if replay else args.ranking
     if rank_enabled is None:
@@ -342,6 +347,7 @@ def plot_inputs(args, directory, loaded, replay):
         "spins": spins,
         "normalization": normalization,
         "layout": layout,
+        "colors": colors,
         "channels": [
             {"name": ch.name, "atoms_1based": ch.atoms, "orbitals": ch.orbitals,
              "max_visible_weight": float(ch.weights[visible].max(initial=0))}

@@ -9,14 +9,20 @@ from PIL import Image
 import numpy as np
 
 
-COLORS = ("#B01C63", "#006D9C", "#147D65", "#B65317", "#6445A2", "#8A6B17")
+COLORS = ("#0072B2", "#D55E00", "#007A5E", "#8544A1",
+          "#A56C00", "#218AA1", "#A64F73", "#423A32")
+LEGACY_COLORS = ("#B01C63", "#006D9C", "#147D65", "#B65317", "#6445A2", "#8A6B17")
 
 
-def channel_colors(count):
-    if count <= len(COLORS):
-        return COLORS[:count]
-    return [hsv_to_rgb((index * .61803398875) % 1, .73, .67 + .19 * (index % 2))
-            for index in range(count)]
+def channel_colors(count, *, legacy=False):
+    base = COLORS
+    if legacy:
+        # Older releases switched the whole palette when the channel count exceeded six.
+        base = LEGACY_COLORS if count <= len(LEGACY_COLORS) else ()
+    colors = list(base[:count])
+    colors.extend(hsv_to_rgb((index * .61803398875) % 1, .73, .67 + .19 * (index % 2))
+                  for index in range(len(colors), count))
+    return colors
 
 
 def geometry(layout, nchannels, nspins):
@@ -64,7 +70,10 @@ def make_figure(path, energy, channels, spins, options, marker_scale):
     figure = Figure(figsize=(width * cols, height * rows + .45), layout="constrained")
     FigureCanvasAgg(figure)
     axes = figure.subplots(rows, cols, squeeze=False)
-    palette = list(zip(channels, channel_colors(len(channels))))
+    colors = options.get("colors")
+    if colors is None:
+        colors = channel_colors(len(channels))
+    palette = list(zip(channels, colors))
     rows_per_spin = rows // len(spins)
     for index, spin in enumerate(spins):
         grid = axes[index * rows_per_spin:(index + 1) * rows_per_spin].flat

@@ -127,6 +127,8 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     assert record["channels"][5]["max_visible_weight"] == pytest.approx(.2)
     assert record["marker"]["formula"] == "area_pt2 = scale * weight"
     assert record["marker"]["scale_pt2_per_weight"] > 0
+    assert record["colors"][:4] == ["#0072B2", "#D55E00", "#007A5E", "#8544A1"]
+    assert len(set(record["colors"])) == len(record["channels"])
     assert record["sources"]["PROCAR"]["sha256"] == hashlib.sha256((sample / "PROCAR").read_bytes()).hexdigest()
     assert {file.name for file in out.iterdir()} == {
         "bands.png", "bands.svg", "bands.pdf", "bands_png.pdf", "plot.json"
@@ -136,6 +138,24 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     succeed(invoke(sample, "plot", "--config", out / "plot.json", "--output", other))
     assert {file.name for file in other.iterdir()} == {file.name for file in out.iterdir()}
     assert (out / "bands.png").read_bytes() == (other / "bands.png").read_bytes()
+
+
+def test_legacy_replay_keeps_its_original_colors(sample):
+    out = sample.parent / "new"
+    succeed(invoke(sample, "plot", sample, "--orbitals", "Ni:dxy", "O:p",
+                   "--output", out, "--formats", "svg"))
+    record = json.loads((out / "plot.json").read_text())
+    svg = (out / "bands.svg").read_text(encoding="utf-8")
+    assert all(color in svg for color in ("#0072b2", "#d55e00"))
+    record.pop("colors")
+    record["version"] = "0.2.2"
+    old_config = sample.parent / "legacy.json"
+    old_config.write_text(json.dumps(record), encoding="utf-8")
+    replay = sample.parent / "legacy-replay"
+    succeed(invoke(sample, "plot", "--config", old_config, "--output", replay))
+    assert json.loads((replay / "plot.json").read_text())["colors"] == ["#B01C63", "#006D9C"]
+    svg = (replay / "bands.svg").read_text(encoding="utf-8")
+    assert all(color in svg for color in ("#b01c63", "#006d9c"))
 
 
 def test_one_channel_fixed_scale_and_site_sum(sample):
