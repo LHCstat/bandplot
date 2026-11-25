@@ -127,7 +127,7 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     assert record["channels"][5]["max_visible_weight"] == pytest.approx(.2)
     assert record["marker"]["formula"] == "area_pt2 = scale * weight"
     assert record["marker"]["scale_pt2_per_weight"] > 0
-    assert record["colors"][:4] == ["#0072B2", "#D55E00", "#007A5E", "#8544A1"]
+    assert record["colors"][:4] == ["#4477BB", "#CC4466", "#228833", "#882288"]
     assert len(set(record["colors"])) == len(record["channels"])
     assert record["sources"]["PROCAR"]["sha256"] == hashlib.sha256((sample / "PROCAR").read_bytes()).hexdigest()
     assert {file.name for file in out.iterdir()} == {
@@ -140,22 +140,29 @@ def test_plot_many_channels_uses_common_linear_scale_and_writes_exports(sample):
     assert (out / "bands.png").read_bytes() == (other / "bands.png").read_bytes()
 
 
-def test_legacy_replay_keeps_its_original_colors(sample):
+@pytest.mark.parametrize(("version", "saved_colors", "original_colors"), [
+    ("0.2.2", None, ["#B01C63", "#006D9C"]),
+    ("0.2.3", ["#0072B2", "#D55E00"], ["#0072B2", "#D55E00"]),
+])
+def test_legacy_replay_keeps_its_original_colors(sample, version, saved_colors, original_colors):
     out = sample.parent / "new"
     succeed(invoke(sample, "plot", sample, "--orbitals", "Ni:dxy", "O:p",
                    "--output", out, "--formats", "svg"))
     record = json.loads((out / "plot.json").read_text())
     svg = (out / "bands.svg").read_text(encoding="utf-8")
-    assert all(color in svg for color in ("#0072b2", "#d55e00"))
-    record.pop("colors")
-    record["version"] = "0.2.2"
+    assert all(color in svg for color in ("#4477bb", "#cc4466"))
+    if saved_colors is None:
+        record.pop("colors")
+    else:
+        record["colors"] = saved_colors
+    record["version"] = version
     old_config = sample.parent / "legacy.json"
     old_config.write_text(json.dumps(record), encoding="utf-8")
     replay = sample.parent / "legacy-replay"
     succeed(invoke(sample, "plot", "--config", old_config, "--output", replay))
-    assert json.loads((replay / "plot.json").read_text())["colors"] == ["#B01C63", "#006D9C"]
+    assert json.loads((replay / "plot.json").read_text())["colors"] == original_colors
     svg = (replay / "bands.svg").read_text(encoding="utf-8")
-    assert all(color in svg for color in ("#b01c63", "#006d9c"))
+    assert all(color.lower() in svg for color in original_colors)
 
 
 def test_one_channel_fixed_scale_and_site_sum(sample):

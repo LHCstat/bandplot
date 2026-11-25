@@ -9,8 +9,9 @@ from PIL import Image
 import numpy as np
 
 
-COLORS = ("#0072B2", "#D55E00", "#007A5E", "#8544A1",
-          "#A56C00", "#218AA1", "#A64F73", "#423A32")
+# Paul Tol's Dark qualitative scheme, ordered for orbital overlays on white.
+COLORS = ("#4477BB", "#CC4466", "#228833", "#882288", "#117788", "#775500",
+          "#993366", "#2255AA", "#006644", "#BB4488", "#444444")
 LEGACY_COLORS = ("#B01C63", "#006D9C", "#147D65", "#B65317", "#6445A2", "#8A6B17")
 
 
